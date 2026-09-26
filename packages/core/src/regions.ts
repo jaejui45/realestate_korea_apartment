@@ -3,8 +3,9 @@ import { SIDO_CODE, type Region, type Sido } from './types';
 
 export const REGIONS = data as Region[];
 
+/** 지역 선택 목록용 (개편 전 코드 제외) */
 export function regionsOf(sido: Sido): Region[] {
-  return REGIONS.filter((r) => r.sido === sido);
+  return REGIONS.filter((r) => r.sido === sido && !r.legacy);
 }
 
 export function findRegion(code: string): Region | undefined {
