@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+/* Figma "디자인 토큰" 과 같은 값 */
+@theme {
+  --color-primary: #7c3aed;
+  --color-primary-soft: #f3eefe;
+  --color-ink: #191f28;
+  --color-sub: #6b7684;
+  --color-ter: #8b95a1;
+  --color-ter2: #b0b8c1;
+  --color-line: #e5e8eb;
+  --color-soft: #f2f4f6;
+  --color-up: #f04452;
+  --color-up-soft: #feecee;
+  --color-down: #2f7bf5;
+  --color-down-soft: #eaf2fe;
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui,
+    "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+}
+
+body {
+  @apply bg-soft text-ink antialiased;
+}

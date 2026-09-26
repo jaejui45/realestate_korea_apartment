@@ -1,0 +1,8 @@
+{
+  "name": "@pilseung/core",
+  "version": "0.1.0",
+  "private": true,
+  "description": "부동산 필승 웹·앱 공통 코드 (타입, 지역 코드, 포맷, 데이터 조회). 외부 의존성 없음.",
+  "main": "src/index.ts",
+  "types": "src/index.ts"
+}

@@ -1,0 +1,3 @@
+PublicDataReader==1.1.1.post2
+supabase>=2.10,<3
+pandas>=2.0
