@@ -80,6 +80,33 @@ def to_rows(df: pd.DataFrame, region: dict) -> tuple[list[dict], list[dict]]:
     return list(complexes.values()), list(uniq.values())
 
 
+def check_key(key: str) -> None:
+    """서비스키가 동작하는지 먼저 확인합니다.
+
+    PublicDataReader는 HTTP 오류(401/403 등)를 출력만 하고 빈 결과를 돌려주기 때문에,
+    키가 잘못돼도 '0건 수집'으로 조용히 끝나는 것을 막기 위함입니다.
+    """
+    import re
+    import requests
+
+    last_month = (dt.date.today().replace(day=1) - dt.timedelta(days=1)).strftime("%Y%m")
+    res = requests.get(
+        "https://apis.data.go.kr/1613000/RTMSDataSvcAptTradeDev/getRTMSDataSvcAptTradeDev",
+        params={"serviceKey": requests.utils.unquote(key), "LAWD_CD": "11110", "DEAL_YMD": last_month, "numOfRows": "1"},
+        timeout=30,
+    )
+    code = re.search(r"<(?:resultCode|returnReasonCode)>([^<]+)<", res.text)
+    msg = next((m for tag in ("returnAuthMsg", "resultMsg", "errMsg") if (m := re.search(f"<{tag}>([^<]+)<", res.text))), None)
+    if res.status_code != 200 or not code or code.group(1) not in ("00", "000"):
+        detail = msg.group(1) if msg else res.text[:200].replace("\n", " ")
+        raise SystemExit(
+            f"서비스키 확인 실패 (HTTP {res.status_code}, 코드 {code.group(1) if code else '-'}): {detail}\n"
+            "- 발급 직후라면 1~2시간 뒤 다시 실행해 보세요.\n"
+            "- '국토교통부_아파트 매매 실거래가 상세 자료' 활용신청이 승인됐는지 확인하세요."
+        )
+    print("서비스키 확인 완료")
+
+
 def upsert(db, table: str, rows: list[dict], conflict: str) -> None:
     for i in range(0, len(rows), BATCH):
         db.table(table).upsert(rows[i:i + BATCH], on_conflict=conflict).execute()
@@ -109,6 +136,7 @@ def main() -> int:
     if args.codes:
         regions = [r for r in regions if r["code"] in args.codes]
 
+    check_key(key)
     api = TransactionPrice(key)
     months = month_list(args.months, dt.date.today())
     total, failed = 0, []
@@ -131,7 +159,8 @@ def main() -> int:
     print(f"완료: 총 {total}건, 실패 {len(failed)}건")
     for f in failed:
         print("  실패:", f, file=sys.stderr)
-    return 0
+    # 실패가 있거나 한 건도 못 받았으면 Actions 에서 빨간불로 보이도록
+    return 1 if failed or total == 0 else 0
 
 
 if __name__ == "__main__":
