@@ -8,6 +8,8 @@ export interface Region {
   code: string; // 시군구 코드 (LAWD_CD 5자리)
   sido: Sido;
   name: string; // 예: '강남구', '성남시 분당구'
+  /** 행정구역 개편 전 코드 (예: 구 신설 전 화성시). 과거 거래 수집용이며 지역 선택 목록에는 나오지 않음 */
+  legacy?: boolean;
 }
 
 export interface Trade {
